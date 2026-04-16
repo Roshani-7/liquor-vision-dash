@@ -3,8 +3,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import DashboardPage from "./pages/DashboardPage";
+import DistributorsPage from "./pages/DistributorsPage";
+import SalesPage from "./pages/SalesPage";
+import OrdersPage from "./pages/OrdersPage";
+import VisitsPage from "./pages/VisitsPage";
+import TargetsPage from "./pages/TargetsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import ReportsPage from "./pages/ReportsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -15,8 +24,17 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route element={<DashboardLayout />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/distributors" element={<DistributorsPage />} />
+            <Route path="/sales" element={<SalesPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/visits" element={<VisitsPage />} />
+            <Route path="/targets" element={<TargetsPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
