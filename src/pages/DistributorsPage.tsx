@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Search, Edit2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Shop {
   id: number; name: string; area: string; category: string; contact: string;
@@ -15,7 +16,7 @@ const initialShops: Shop[] = [
   { id: 6, name: "Star Liquors", area: "South", category: "Standard", contact: "9876543215", lastVisit: "3 days ago", lastOrder: "₹28,000", performance: "medium" },
 ];
 
-const perfBadge = { high: "bg-success/10 text-success", medium: "bg-warning/10 text-warning", low: "bg-destructive/10 text-destructive" };
+const perfBadge = { high: "bg-success/10 text-success ring-1 ring-success/20", medium: "bg-warning/10 text-warning ring-1 ring-warning/20", low: "bg-destructive/10 text-destructive ring-1 ring-destructive/20" };
 
 export default function DistributorsPage() {
   const [shops, setShops] = useState(initialShops);
@@ -27,11 +28,16 @@ export default function DistributorsPage() {
   const filtered = shops.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.area.toLowerCase().includes(search.toLowerCase()));
 
   const handleSave = () => {
-    if (!form.name || !form.area || !form.contact) return;
+    if (!form.name || !form.area || !form.contact) {
+      toast.error("Please fill all required fields");
+      return;
+    }
     if (editingShop) {
       setShops(shops.map(s => s.id === editingShop.id ? { ...s, ...form } : s));
+      toast.success(`${form.name} updated`);
     } else {
       setShops([...shops, { ...form, id: Date.now(), lastVisit: "Never", lastOrder: "—", performance: "low" as const }]);
+      toast.success(`${form.name} added`, { description: `${form.area} · ${form.category}` });
     }
     setForm({ name: "", area: "", category: "Standard", contact: "" });
     setShowForm(false);
@@ -44,7 +50,11 @@ export default function DistributorsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: number) => setShops(shops.filter(s => s.id !== id));
+  const handleDelete = (id: number) => {
+    const shop = shops.find(s => s.id === id);
+    setShops(shops.filter(s => s.id !== id));
+    toast.success(`Deleted ${shop?.name}`, { description: "Shop removed from your distributor list" });
+  };
 
   return (
     <div className="space-y-6">
@@ -54,13 +64,13 @@ export default function DistributorsPage() {
           <p className="text-sm text-muted-foreground">{shops.length} registered shops</p>
         </div>
         <button onClick={() => { setShowForm(true); setEditingShop(null); setForm({ name: "", area: "", category: "Standard", contact: "" }); }}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+          className="flex items-center gap-2 rounded-lg gradient-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-elegant hover:opacity-90 transition-opacity">
           <Plus className="h-4 w-4" /> Add Shop
         </button>
       </div>
 
       {showForm && (
-        <div className="rounded-xl border border-border bg-card p-5 animate-fade-in">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-card-soft animate-fade-in">
           <h3 className="text-sm font-semibold text-card-foreground mb-4">{editingShop ? "Edit Shop" : "Add New Shop"}</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <input placeholder="Shop Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
@@ -75,8 +85,8 @@ export default function DistributorsPage() {
               className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div className="mt-4 flex gap-2">
-            <button onClick={handleSave} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Save</button>
-            <button onClick={() => { setShowForm(false); setEditingShop(null); }} className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">Cancel</button>
+            <button onClick={handleSave} className="rounded-lg gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-elegant hover:opacity-90 transition-opacity">Save</button>
+            <button onClick={() => { setShowForm(false); setEditingShop(null); }} className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors">Cancel</button>
           </div>
         </div>
       )}
@@ -87,19 +97,19 @@ export default function DistributorsPage() {
           className="w-full rounded-lg border border-input bg-background py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-card-soft">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/30 text-left text-xs text-muted-foreground">
-              <th className="px-4 py-3 font-medium">Shop</th><th className="px-4 py-3 font-medium">Area</th>
-              <th className="px-4 py-3 font-medium">Category</th><th className="px-4 py-3 font-medium">Contact</th>
-              <th className="px-4 py-3 font-medium">Last Visit</th><th className="px-4 py-3 font-medium">Last Order</th>
-              <th className="px-4 py-3 font-medium">Performance</th><th className="px-4 py-3 font-medium">Actions</th>
+            <tr className="border-b border-border bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <th className="px-4 py-3 font-semibold">Shop</th><th className="px-4 py-3 font-semibold">Area</th>
+              <th className="px-4 py-3 font-semibold">Category</th><th className="px-4 py-3 font-semibold">Contact</th>
+              <th className="px-4 py-3 font-semibold">Last Visit</th><th className="px-4 py-3 font-semibold">Last Order</th>
+              <th className="px-4 py-3 font-semibold">Performance</th><th className="px-4 py-3 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map(shop => (
-              <tr key={shop.id} className="border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors">
+              <tr key={shop.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-3 font-medium text-card-foreground">{shop.name}</td>
                 <td className="px-4 py-3 text-muted-foreground">{shop.area}</td>
                 <td className="px-4 py-3 text-muted-foreground">{shop.category}</td>
@@ -107,16 +117,19 @@ export default function DistributorsPage() {
                 <td className="px-4 py-3 text-muted-foreground">{shop.lastVisit}</td>
                 <td className="px-4 py-3 text-card-foreground">{shop.lastOrder}</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${perfBadge[shop.performance]}`}>{shop.performance}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${perfBadge[shop.performance]}`}>{shop.performance}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEdit(shop)} className="text-muted-foreground hover:text-foreground"><Edit2 className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete(shop.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  <div className="flex gap-1">
+                    <button onClick={() => handleEdit(shop)} aria-label="Edit" className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"><Edit2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete(shop.id)} aria-label="Delete" className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">No shops match "{search}"</td></tr>
+            )}
           </tbody>
         </table>
       </div>

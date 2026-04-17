@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 
 interface StatCardProps {
   title: string;
@@ -10,25 +11,28 @@ interface StatCardProps {
 }
 
 export function StatCard({ title, value, change, changeType = "neutral", icon: Icon }: StatCardProps) {
+  const ChangeIcon = changeType === "positive" ? ArrowUpRight : changeType === "negative" ? ArrowDownRight : Minus;
   return (
-    <div className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="mt-1 text-2xl font-semibold text-card-foreground">{value}</p>
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card p-5 hover-lift">
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+      <div className="relative flex items-start justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
+          <p className="mt-2 text-2xl font-bold text-card-foreground">{value}</p>
           {change && (
-            <p className={cn(
-              "mt-1 text-xs font-medium",
-              changeType === "positive" && "text-success",
-              changeType === "negative" && "text-destructive",
-              changeType === "neutral" && "text-muted-foreground"
+            <div className={cn(
+              "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+              changeType === "positive" && "bg-success/10 text-success",
+              changeType === "negative" && "bg-destructive/10 text-destructive",
+              changeType === "neutral" && "bg-muted text-muted-foreground",
             )}>
+              <ChangeIcon className="h-3 w-3" />
               {change}
-            </p>
+            </div>
           )}
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="h-5 w-5 text-primary" />
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl gradient-primary shadow-elegant">
+          <Icon className="h-5 w-5 text-primary-foreground" />
         </div>
       </div>
     </div>
