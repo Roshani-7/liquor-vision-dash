@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Save } from "lucide-react";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 interface SalesEntry {
   id: number; date: string; shop: string; product: string; qty: number; rate: number; total: number;
@@ -17,11 +18,16 @@ export default function SalesPage() {
   const [form, setForm] = useState({ shop: shops[0], product: products[0], qty: 0, rate: 0 });
 
   const addEntry = () => {
-    if (form.qty <= 0 || form.rate <= 0) return;
+    if (form.qty <= 0 || form.rate <= 0) {
+      toast.error("Quantity and rate must be greater than 0");
+      return;
+    }
+    const total = form.qty * form.rate;
     setEntries([...entries, {
       id: Date.now(), date: new Date().toISOString().split("T")[0],
-      shop: form.shop, product: form.product, qty: form.qty, rate: form.rate, total: form.qty * form.rate,
+      shop: form.shop, product: form.product, qty: form.qty, rate: form.rate, total,
     }]);
+    toast.success(`Sale recorded`, { description: `${form.shop} · ${form.product} · ₹${total.toLocaleString()}` });
     setForm({ ...form, qty: 0, rate: 0 });
   };
 
