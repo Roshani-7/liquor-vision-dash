@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore } from "react";
 
 export interface Shop {
   id: number;
@@ -185,9 +185,9 @@ export const store = {
   },
 };
 
-// React hook — cache selector result per state snapshot to keep referential stability
+// React hook — memoize selector result per state snapshot for referential stability
 export function useStore<T>(selector: (s: State) => T): T {
-  const cacheRef = { current: null as null | { state: State; value: T } };
+  const cacheRef = useRef<{ state: State; value: T } | null>(null);
   const getSnapshot = () => {
     const s = store.get();
     if (cacheRef.current && cacheRef.current.state === s) return cacheRef.current.value;
