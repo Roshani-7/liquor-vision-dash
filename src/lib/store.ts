@@ -185,9 +185,17 @@ export const store = {
   },
 };
 
-// React hook
+// React hook — cache selector result per state snapshot to keep referential stability
 export function useStore<T>(selector: (s: State) => T): T {
-  return useSyncExternalStore(store.subscribe, () => selector(store.get()), () => selector(store.get()));
+  const cacheRef = { current: null as null | { state: State; value: T } };
+  const getSnapshot = () => {
+    const s = store.get();
+    if (cacheRef.current && cacheRef.current.state === s) return cacheRef.current.value;
+    const value = selector(s);
+    cacheRef.current = { state: s, value };
+    return value;
+  };
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
 }
 
 // ===== Derived selectors =====
