@@ -136,3 +136,43 @@ export function generateReport(period: ReportPeriod) {
   doc.save(fname);
   return { fname, total, txCount };
 }
+
+export function buildReportSummary(period: ReportPeriod) {
+  const s = store.get();
+  const days = periodDays[period];
+  const cutoff = daysAgo(days - 1);
+  const periodSales = s.sales.filter(x => x.date >= cutoff);
+  const total = periodSales.reduce((a, x) => a + x.total, 0);
+  const txCount = periodSales.length;
+  const activeShops = new Set(periodSales.map(x => x.shopId)).size;
+  const areas = areaPerformance(s, days).sort((a, b) => b.current - a.current).slice(0, 3);
+  const top = topShops(s, 3, days);
+  const title = `${period.charAt(0).toUpperCase() + period.slice(1)} Sales Report`;
+
+  const lines = [
+    `*📊 ${title}*`,
+    `_${new Date().toLocaleString("en-IN")}_`,
+    ``,
+    `*Summary*`,
+    `• Total Sales: ${fmtINR(total)}`,
+    `• Transactions: ${txCount}`,
+    `• Active Shops: ${activeShops}`,
+    `• Period: Last ${days} day${days > 1 ? "s" : ""}`,
+    ``,
+    `*Top Areas*`,
+    ...areas.map((a, i) => `${i + 1}. ${a.area} — ${fmtINR(a.current)} (${a.growth >= 0 ? "+" : ""}${a.growth}%)`),
+    ``,
+    `*Top Shops*`,
+    ...top.map((t, i) => `${i + 1}. ${t.name} — ${fmtINR(t.sales)}`),
+    ``,
+    `_Sent from Sales Intelligence_`,
+  ];
+  return lines.join("\n");
+}
+
+export function shareReportOnWhatsApp(period: ReportPeriod, phone?: string) {
+  const text = encodeURIComponent(buildReportSummary(period));
+  const base = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, "")}` : `https://wa.me/`;
+  const url = `${base}?text=${text}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
