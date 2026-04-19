@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Store, ShoppingCart, ClipboardList,
-  MapPin, Target, BarChart3, FileText, Bell, X, Wine
+  MapPin, Target, BarChart3, FileText, Bell, X, Wine, Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/orders", icon: ClipboardList, label: "Orders" },
   { to: "/visits", icon: MapPin, label: "Visit Planner" },
   { to: "/targets", icon: Target, label: "Targets" },
+  { to: "/expenses", icon: Wallet, label: "Expenses" },
   { to: "/analytics", icon: BarChart3, label: "Analytics" },
   { to: "/reports", icon: FileText, label: "Reports" },
   { to: "/notifications", icon: Bell, label: "Notifications" },
