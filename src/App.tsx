@@ -13,6 +13,7 @@ import TargetsPage from "./pages/TargetsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ReportsPage from "./pages/ReportsPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ExpensesPage from "./pages/ExpensesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
