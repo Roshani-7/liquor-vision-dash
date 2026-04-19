@@ -127,7 +127,11 @@ let state: State = (() => {
   if (typeof window === "undefined") return defaultState();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as State;
+    if (raw) {
+      const parsed = JSON.parse(raw) as State;
+      if (!parsed.expenses) parsed.expenses = [];
+      return parsed;
+    }
   } catch {}
   const s = defaultState();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
