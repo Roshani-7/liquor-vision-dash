@@ -5,10 +5,16 @@ import { useStore, dashboardKPIs } from "@/lib/store";
 export default function WelcomePage() {
   const kpis = useStore(dashboardKPIs);
   const distributors = useStore((s) => s.shops.length);
+  const monthlyTarget = useStore((s) => s.targets.monthly);
+  const monthSales = useStore((s) => {
+    const start = s.targets.startOfMonth;
+    return s.sales.filter((x) => x.date >= start).reduce((a, x) => a + x.total, 0);
+  });
+  const targetPct = monthlyTarget > 0 ? Math.min(100, Math.round((monthSales / monthlyTarget) * 100)) : 0;
 
   const stats = [
     { label: "Today's Sales", value: `₹${kpis.todaySales.toLocaleString("en-IN")}`, icon: TrendingUp, accent: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-400" },
-    { label: "Monthly Target", value: `${kpis.monthProgress.toFixed(0)}%`, icon: Target, accent: "from-sky-500/20 to-sky-500/5", iconColor: "text-sky-400" },
+    { label: "Monthly Target", value: `${targetPct}%`, icon: Target, accent: "from-sky-500/20 to-sky-500/5", iconColor: "text-sky-400" },
     { label: "Active Distributors", value: String(distributors), icon: Users, accent: "from-indigo-500/20 to-indigo-500/5", iconColor: "text-indigo-300" },
   ];
 
