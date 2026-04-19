@@ -118,6 +118,7 @@ function defaultState(): State {
     sales: seedSales(),
     orders: seedOrders,
     visits: seedVisits,
+    expenses: [],
     targets: { monthly: 2500000, startOfMonth, daysInMonth },
   };
 }
