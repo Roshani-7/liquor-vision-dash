@@ -92,13 +92,13 @@ export default function WelcomePage() {
             Live • North Region
           </span>
 
-          <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-slate-900 md:text-6xl">
-            Welcome,{" "}
+          <p className="mt-5 text-sm font-medium uppercase tracking-[0.2em] text-slate-500 md:text-base">
+            Welcome, Area Sales Manager
+          </p>
+          <h1 className="mt-2 text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 md:text-7xl">
             <span className="bg-gradient-to-r from-sky-600 via-indigo-600 to-emerald-600 bg-clip-text text-transparent">
-              Area Sales Manager
+              Santosh Galande
             </span>
-            <br />
-            Santosh Galande
           </h1>
 
           <p className="mt-5 max-w-2xl text-base text-slate-600 md:text-lg">
