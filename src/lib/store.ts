@@ -37,6 +37,14 @@ export interface Visit {
   notes?: string;
 }
 
+export interface Expense {
+  id: number;
+  date: string; // YYYY-MM-DD
+  category: "Travel" | "Food" | "Lodging" | "Fuel" | "Other";
+  amount: number;
+  notes?: string;
+}
+
 export interface Targets {
   monthly: number;
   startOfMonth: string; // YYYY-MM-01
@@ -48,6 +56,7 @@ interface State {
   sales: Sale[];
   orders: Order[];
   visits: Visit[];
+  expenses: Expense[];
   targets: Targets;
 }
 
@@ -109,6 +118,7 @@ function defaultState(): State {
     sales: seedSales(),
     orders: seedOrders,
     visits: seedVisits,
+    expenses: [],
     targets: { monthly: 2500000, startOfMonth, daysInMonth },
   };
 }
@@ -117,7 +127,11 @@ let state: State = (() => {
   if (typeof window === "undefined") return defaultState();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as State;
+    if (raw) {
+      const parsed = JSON.parse(raw) as State;
+      if (!parsed.expenses) parsed.expenses = [];
+      return parsed;
+    }
   } catch {}
   const s = defaultState();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
@@ -181,6 +195,17 @@ export const store = {
 
   setMonthlyTarget(monthly: number) {
     state = { ...state, targets: { ...state.targets, monthly } };
+    emit();
+  },
+
+  addExpense(input: Omit<Expense, "id" | "date"> & { date?: string }) {
+    const expense: Expense = { id: Date.now(), date: input.date ?? iso(new Date()), ...input };
+    state = { ...state, expenses: [expense, ...state.expenses] };
+    emit();
+    return expense;
+  },
+  deleteExpense(id: number) {
+    state = { ...state, expenses: state.expenses.filter(e => e.id !== id) };
     emit();
   },
 };
