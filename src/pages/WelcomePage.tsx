@@ -143,7 +143,45 @@ export default function WelcomePage() {
           ))}
         </div>
 
-        {/* Mobile nav chips */}
+        {/* All Features */}
+        <section className="mt-16">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Everything you need</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">All features at a glance</h2>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[
+              { to: "/dashboard", label: "Dashboard", desc: "KPIs, trends & live snapshot", icon: LayoutDashboard, bg: "bg-indigo-50", color: "text-indigo-600" },
+              { to: "/distributors", label: "Distributors", desc: "Manage shops & contacts", icon: Store, bg: "bg-sky-50", color: "text-sky-600" },
+              { to: "/sales", label: "Sales Entry", desc: "Log daily sales quickly", icon: ShoppingCart, bg: "bg-emerald-50", color: "text-emerald-600" },
+              { to: "/orders", label: "Orders", desc: "Track pending & delivered", icon: ClipboardList, bg: "bg-amber-50", color: "text-amber-600" },
+              { to: "/visits", label: "Visit Planner", desc: "Smart shop suggestions", icon: MapPin, bg: "bg-rose-50", color: "text-rose-600" },
+              { to: "/targets", label: "Targets", desc: "Monthly goals & progress", icon: Target, bg: "bg-violet-50", color: "text-violet-600" },
+              { to: "/expenses", label: "Expenses", desc: "Travel & daily expense log", icon: Wallet, bg: "bg-teal-50", color: "text-teal-600" },
+              { to: "/analytics", label: "Analytics", desc: "Deep insights & charts", icon: BarChart3, bg: "bg-cyan-50", color: "text-cyan-600" },
+              { to: "/reports", label: "Reports", desc: "PDF & WhatsApp share", icon: FileText, bg: "bg-fuchsia-50", color: "text-fuchsia-600" },
+              { to: "/notifications", label: "Notifications", desc: "Alerts & reminders", icon: Bell, bg: "bg-orange-50", color: "text-orange-600" },
+            ].map((f) => (
+              <Link
+                key={f.to}
+                to={f.to}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-slate-300 hover:shadow-md"
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${f.bg} ${f.color}`}>
+                  <f.icon className="h-6 w-6" />
+                </div>
+                <p className="mt-4 text-sm font-semibold text-slate-900">{f.label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">{f.desc}</p>
+                <ArrowRight className="absolute right-4 top-4 h-4 w-4 text-slate-300 transition-all group-hover:right-3 group-hover:text-slate-600" />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+
         <div className="mt-10 flex flex-wrap gap-2 md:hidden">
           {navLinks.map((l) => (
             <Link
