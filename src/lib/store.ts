@@ -197,6 +197,17 @@ export const store = {
     state = { ...state, targets: { ...state.targets, monthly } };
     emit();
   },
+
+  addExpense(input: Omit<Expense, "id" | "date"> & { date?: string }) {
+    const expense: Expense = { id: Date.now(), date: input.date ?? iso(new Date()), ...input };
+    state = { ...state, expenses: [expense, ...state.expenses] };
+    emit();
+    return expense;
+  },
+  deleteExpense(id: number) {
+    state = { ...state, expenses: state.expenses.filter(e => e.id !== id) };
+    emit();
+  },
 };
 
 // React hook — memoize selector result per state snapshot for referential stability
