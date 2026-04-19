@@ -37,6 +37,14 @@ export interface Visit {
   notes?: string;
 }
 
+export interface Expense {
+  id: number;
+  date: string; // YYYY-MM-DD
+  category: "Travel" | "Food" | "Lodging" | "Fuel" | "Other";
+  amount: number;
+  notes?: string;
+}
+
 export interface Targets {
   monthly: number;
   startOfMonth: string; // YYYY-MM-01
