@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BarChart3, Wine, LayoutDashboard, Store, ShoppingCart, FileText, LogOut, TrendingUp, Target, Users } from "lucide-react";
+import { ArrowRight, BarChart3, Wine, LayoutDashboard, Store, ShoppingCart, FileText, LogOut, TrendingUp, Target, Users, MapPin, Bell, Wallet, ClipboardList } from "lucide-react";
 import { useStore, dashboardKPIs } from "@/lib/store";
 
 export default function WelcomePage() {
