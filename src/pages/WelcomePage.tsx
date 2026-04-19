@@ -123,25 +123,6 @@ export default function WelcomePage() {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" style={{ animation: "fade-in 0.6s ease-out 0.1s both" }}>
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className={`group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ring-1 ${s.ring} transition-transform hover:-translate-y-1 hover:shadow-md`}
-            >
-              <div className="relative flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">{s.label}</p>
-                  <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{s.value}</p>
-                </div>
-                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${s.iconBg} ${s.iconColor}`}>
-                  <s.icon className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* All Features */}
         <section className="mt-16">
