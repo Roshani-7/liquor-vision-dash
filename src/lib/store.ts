@@ -56,6 +56,7 @@ interface State {
   sales: Sale[];
   orders: Order[];
   visits: Visit[];
+  expenses: Expense[];
   targets: Targets;
 }
 
