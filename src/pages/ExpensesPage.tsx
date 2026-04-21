@@ -321,6 +321,23 @@ export default function ExpensesPage() {
           )}
         </div>
       </div>
+
+      {preview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4"
+          onClick={() => setPreview(null)}
+        >
+          <img src={preview} alt="Bill full" className="max-h-full max-w-full rounded-lg shadow-2xl" />
+          <button
+            type="button"
+            onClick={() => setPreview(null)}
+            className="absolute right-4 top-4 rounded-full bg-card p-2 shadow"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
