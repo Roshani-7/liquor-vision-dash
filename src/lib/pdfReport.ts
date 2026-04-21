@@ -172,7 +172,13 @@ export function buildReportSummary(period: ReportPeriod) {
 
 export function shareReportOnWhatsApp(period: ReportPeriod, phone?: string) {
   const text = encodeURIComponent(buildReportSummary(period));
-  const base = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, "")}` : `https://wa.me/`;
-  const url = `${base}?text=${text}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+  const cleaned = phone ? phone.replace(/[^0-9]/g, "") : "";
+  const url = cleaned
+    ? `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`
+    : `https://api.whatsapp.com/send?text=${text}`;
+  const win = window.open(url, "_blank", "noopener,noreferrer");
+  if (!win) {
+    // Popup blocked — fall back to same-tab navigation
+    window.location.href = url;
+  }
 }
