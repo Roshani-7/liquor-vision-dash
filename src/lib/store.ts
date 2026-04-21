@@ -124,7 +124,7 @@ function defaultState(): State {
   };
 }
 
-let state: State = (() => {
+function loadInitialState(): State {
   if (typeof window === "undefined") return defaultState();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -135,9 +135,11 @@ let state: State = (() => {
     }
   } catch {}
   const s = defaultState();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
   return s;
-})();
+}
+
+let state: State = loadInitialState();
 
 const listeners = new Set<() => void>();
 function emit() {
