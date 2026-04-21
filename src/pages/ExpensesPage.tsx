@@ -53,6 +53,9 @@ export default function ExpensesPage() {
   const [category, setCategory] = useState<Expense["category"]>("Travel");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
+  const [billImage, setBillImage] = useState<string | undefined>(undefined);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -72,9 +75,24 @@ export default function ExpensesPage() {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return; }
-    store.addExpense({ date, category, amount: amt, notes });
+    store.addExpense({ date, category, amount: amt, notes, billImage });
     toast.success("Expense added");
-    setAmount(""); setNotes("");
+    setAmount(""); setNotes(""); setBillImage(undefined);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleBillSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { toast.error("Please select an image"); return; }
+    if (f.size > MAX_BILL_BYTES) { toast.error("Image too large (max 4MB)"); return; }
+    try {
+      const url = await fileToCompressedDataUrl(f);
+      setBillImage(url);
+      toast.success("Bill attached");
+    } catch {
+      toast.error("Could not read image");
+    }
   };
 
   const handleDelete = (id: number) => {
