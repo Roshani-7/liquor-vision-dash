@@ -285,10 +285,18 @@ export default function ExpensesPage() {
                     <div className="flex items-center gap-2">
                       <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium">{e.category}</span>
                       <span className="text-xs text-muted-foreground">{e.date}</span>
+                      {e.billImage && (
+                        <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Bill</span>
+                      )}
                     </div>
                     {e.notes && <p className="mt-1 truncate text-sm text-muted-foreground">{e.notes}</p>}
                   </div>
                   <div className="flex items-center gap-3">
+                    {e.billImage && (
+                      <button type="button" onClick={() => setPreview(e.billImage!)} aria-label="View bill">
+                        <img src={e.billImage} alt="Bill" className="h-10 w-10 rounded border object-cover" />
+                      </button>
+                    )}
                     <span className="font-semibold">{fmtINR(e.amount)}</span>
                     <Button size="icon" variant="ghost" onClick={() => handleDelete(e.id)} aria-label="Delete">
                       <Trash2 className="h-4 w-4 text-destructive" />
