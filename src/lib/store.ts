@@ -1,4 +1,4 @@
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
 export interface Shop {
   id: number;
@@ -211,17 +211,16 @@ export const store = {
   },
 };
 
-// React hook — memoize selector result per state snapshot for referential stability
+// React hook — re-render when the store changes; selector picks the slice.
 export function useStore<T>(selector: (s: State) => T): T {
-  const cacheRef = useRef<{ state: State; value: T } | null>(null);
-  const getSnapshot = () => {
-    const s = store.get();
-    if (cacheRef.current && cacheRef.current.state === s) return cacheRef.current.value;
-    const value = selector(s);
-    cacheRef.current = { state: s, value };
-    return value;
-  };
-  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  const [value, setValue] = useState<T>(() => selector(store.get()));
+  useEffect(() => {
+    setValue(selector(store.get()));
+    const unsub = store.subscribe(() => setValue(selector(store.get())));
+    return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return value;
 }
 
 // ===== Derived selectors =====
