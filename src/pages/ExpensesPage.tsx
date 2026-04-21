@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Wallet, Plus, Trash2, Download } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Wallet, Plus, Trash2, Download, Paperclip, X } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -12,6 +12,40 @@ import {
 import { useStore, store, fmtINR, type Expense } from "@/lib/store";
 
 const CATEGORIES: Expense["category"][] = ["Travel", "Food", "Lodging", "Fuel", "Other"];
+const MAX_BILL_BYTES = 4 * 1024 * 1024; // 4 MB raw upload cap
+
+function fileToCompressedDataUrl(file: File, maxDim = 1280, quality = 0.78): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Could not read image"));
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas unavailable"));
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageSize(dataUrl: string): Promise<{ w: number; h: number }> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.width, h: img.height });
+    img.onerror = () => resolve({ w: 600, h: 800 });
+    img.src = dataUrl;
+  });
+}
 
 export default function ExpensesPage() {
   const expenses = useStore(s => s.expenses);
@@ -19,6 +53,9 @@ export default function ExpensesPage() {
   const [category, setCategory] = useState<Expense["category"]>("Travel");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
+  const [billImage, setBillImage] = useState<string | undefined>(undefined);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -38,9 +75,24 @@ export default function ExpensesPage() {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return; }
-    store.addExpense({ date, category, amount: amt, notes });
+    store.addExpense({ date, category, amount: amt, notes, billImage });
     toast.success("Expense added");
-    setAmount(""); setNotes("");
+    setAmount(""); setNotes(""); setBillImage(undefined);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleBillSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { toast.error("Please select an image"); return; }
+    if (f.size > MAX_BILL_BYTES) { toast.error("Image too large (max 4MB)"); return; }
+    try {
+      const url = await fileToCompressedDataUrl(f);
+      setBillImage(url);
+      toast.success("Bill attached");
+    } catch {
+      toast.error("Could not read image");
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -48,8 +100,10 @@ export default function ExpensesPage() {
     toast.success("Expense removed");
   };
 
-  const handleReport = () => {
+  const handleReport = async () => {
     const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
     doc.setFontSize(16);
     doc.text("Expense Report", 14, 18);
     doc.setFontSize(10);
@@ -64,6 +118,7 @@ export default function ExpensesPage() {
         ["This Month", fmtINR(summary.monthTotal)],
         ["All-time Total", fmtINR(summary.total)],
         ["Entries", String(expenses.length)],
+        ["Bills attached", String(expenses.filter(e => e.billImage).length)],
       ],
       theme: "grid",
       headStyles: { fillColor: [37, 99, 235] },
@@ -80,13 +135,42 @@ export default function ExpensesPage() {
 
     if (expenses.length) {
       autoTable(doc, {
-        head: [["Date", "Category", "Amount", "Notes"]],
+        head: [["Date", "Category", "Amount", "Notes", "Bill"]],
         body: [...expenses]
           .sort((a, b) => b.date.localeCompare(a.date))
-          .map(e => [e.date, e.category, fmtINR(e.amount), e.notes ?? ""]),
+          .map(e => [e.date, e.category, fmtINR(e.amount), e.notes ?? "", e.billImage ? "Yes" : "—"]),
         theme: "striped",
         headStyles: { fillColor: [37, 99, 235] },
       });
+    }
+
+    const withBills = [...expenses]
+      .filter(e => !!e.billImage)
+      .sort((a, b) => b.date.localeCompare(a.date));
+    for (const e of withBills) {
+      doc.addPage();
+      doc.setFontSize(14);
+      doc.setTextColor(20);
+      doc.text("Bill Receipt", 14, 18);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`${e.date} · ${e.category} · ${fmtINR(e.amount)}`, 14, 25);
+      if (e.notes) doc.text(`Notes: ${e.notes}`, 14, 31);
+
+      const { w, h } = await loadImageSize(e.billImage!);
+      const maxW = pageW - 28;
+      const maxH = pageH - 50;
+      const ratio = Math.min(maxW / w, maxH / h);
+      const drawW = w * ratio;
+      const drawH = h * ratio;
+      const x = (pageW - drawW) / 2;
+      const y = 38;
+      try {
+        doc.addImage(e.billImage!, "JPEG", x, y, drawW, drawH);
+      } catch {
+        doc.setTextColor(180, 30, 30);
+        doc.text("(Could not embed image)", 14, y + 10);
+      }
     }
 
     const fname = `expense-report-${new Date().toISOString().split("T")[0]}.pdf`;
@@ -148,6 +232,41 @@ export default function ExpensesPage() {
             <Label htmlFor="exp-notes">Notes</Label>
             <Input id="exp-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" />
           </div>
+          <div className="space-y-2">
+            <Label>Bill Photo</Label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleBillSelect}
+              className="hidden"
+              id="exp-bill"
+            />
+            {billImage ? (
+              <div className="relative inline-block">
+                <img
+                  src={billImage}
+                  alt="Bill preview"
+                  className="h-24 w-24 rounded-md border object-cover cursor-zoom-in"
+                  onClick={() => setPreview(billImage)}
+                />
+                <button
+                  type="button"
+                  onClick={() => { setBillImage(undefined); if (fileRef.current) fileRef.current.value = ""; }}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground shadow"
+                  aria-label="Remove bill"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <Button type="button" variant="outline" className="w-full gap-2" onClick={() => fileRef.current?.click()}>
+                <Paperclip className="h-4 w-4" /> Attach Bill Photo
+              </Button>
+            )}
+            <p className="text-[11px] text-muted-foreground">Optional. Image is compressed and embedded in your PDF report.</p>
+          </div>
           <Button type="submit" className="w-full gap-2"><Plus className="h-4 w-4" /> Add Expense</Button>
         </form>
 
@@ -166,10 +285,18 @@ export default function ExpensesPage() {
                     <div className="flex items-center gap-2">
                       <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium">{e.category}</span>
                       <span className="text-xs text-muted-foreground">{e.date}</span>
+                      {e.billImage && (
+                        <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">Bill</span>
+                      )}
                     </div>
                     {e.notes && <p className="mt-1 truncate text-sm text-muted-foreground">{e.notes}</p>}
                   </div>
                   <div className="flex items-center gap-3">
+                    {e.billImage && (
+                      <button type="button" onClick={() => setPreview(e.billImage!)} aria-label="View bill">
+                        <img src={e.billImage} alt="Bill" className="h-10 w-10 rounded border object-cover" />
+                      </button>
+                    )}
                     <span className="font-semibold">{fmtINR(e.amount)}</span>
                     <Button size="icon" variant="ghost" onClick={() => handleDelete(e.id)} aria-label="Delete">
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -194,6 +321,23 @@ export default function ExpensesPage() {
           )}
         </div>
       </div>
+
+      {preview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4"
+          onClick={() => setPreview(null)}
+        >
+          <img src={preview} alt="Bill full" className="max-h-full max-w-full rounded-lg shadow-2xl" />
+          <button
+            type="button"
+            onClick={() => setPreview(null)}
+            className="absolute right-4 top-4 rounded-full bg-card p-2 shadow"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -43,6 +43,7 @@ export interface Expense {
   category: "Travel" | "Food" | "Lodging" | "Fuel" | "Other";
   amount: number;
   notes?: string;
+  billImage?: string; // data URL of the attached bill photo
 }
 
 export interface Targets {
