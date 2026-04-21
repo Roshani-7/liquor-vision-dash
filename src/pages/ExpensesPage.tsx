@@ -100,8 +100,10 @@ export default function ExpensesPage() {
     toast.success("Expense removed");
   };
 
-  const handleReport = () => {
+  const handleReport = async () => {
     const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
     doc.setFontSize(16);
     doc.text("Expense Report", 14, 18);
     doc.setFontSize(10);
@@ -116,6 +118,7 @@ export default function ExpensesPage() {
         ["This Month", fmtINR(summary.monthTotal)],
         ["All-time Total", fmtINR(summary.total)],
         ["Entries", String(expenses.length)],
+        ["Bills attached", String(expenses.filter(e => e.billImage).length)],
       ],
       theme: "grid",
       headStyles: { fillColor: [37, 99, 235] },
@@ -132,13 +135,42 @@ export default function ExpensesPage() {
 
     if (expenses.length) {
       autoTable(doc, {
-        head: [["Date", "Category", "Amount", "Notes"]],
+        head: [["Date", "Category", "Amount", "Notes", "Bill"]],
         body: [...expenses]
           .sort((a, b) => b.date.localeCompare(a.date))
-          .map(e => [e.date, e.category, fmtINR(e.amount), e.notes ?? ""]),
+          .map(e => [e.date, e.category, fmtINR(e.amount), e.notes ?? "", e.billImage ? "Yes" : "—"]),
         theme: "striped",
         headStyles: { fillColor: [37, 99, 235] },
       });
+    }
+
+    const withBills = [...expenses]
+      .filter(e => !!e.billImage)
+      .sort((a, b) => b.date.localeCompare(a.date));
+    for (const e of withBills) {
+      doc.addPage();
+      doc.setFontSize(14);
+      doc.setTextColor(20);
+      doc.text("Bill Receipt", 14, 18);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`${e.date} · ${e.category} · ${fmtINR(e.amount)}`, 14, 25);
+      if (e.notes) doc.text(`Notes: ${e.notes}`, 14, 31);
+
+      const { w, h } = await loadImageSize(e.billImage!);
+      const maxW = pageW - 28;
+      const maxH = pageH - 50;
+      const ratio = Math.min(maxW / w, maxH / h);
+      const drawW = w * ratio;
+      const drawH = h * ratio;
+      const x = (pageW - drawW) / 2;
+      const y = 38;
+      try {
+        doc.addImage(e.billImage!, "JPEG", x, y, drawW, drawH);
+      } catch {
+        doc.setTextColor(180, 30, 30);
+        doc.text("(Could not embed image)", 14, y + 10);
+      }
     }
 
     const fname = `expense-report-${new Date().toISOString().split("T")[0]}.pdf`;
