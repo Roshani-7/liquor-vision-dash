@@ -232,6 +232,41 @@ export default function ExpensesPage() {
             <Label htmlFor="exp-notes">Notes</Label>
             <Input id="exp-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" />
           </div>
+          <div className="space-y-2">
+            <Label>Bill Photo</Label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleBillSelect}
+              className="hidden"
+              id="exp-bill"
+            />
+            {billImage ? (
+              <div className="relative inline-block">
+                <img
+                  src={billImage}
+                  alt="Bill preview"
+                  className="h-24 w-24 rounded-md border object-cover cursor-zoom-in"
+                  onClick={() => setPreview(billImage)}
+                />
+                <button
+                  type="button"
+                  onClick={() => { setBillImage(undefined); if (fileRef.current) fileRef.current.value = ""; }}
+                  className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground shadow"
+                  aria-label="Remove bill"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <Button type="button" variant="outline" className="w-full gap-2" onClick={() => fileRef.current?.click()}>
+                <Paperclip className="h-4 w-4" /> Attach Bill Photo
+              </Button>
+            )}
+            <p className="text-[11px] text-muted-foreground">Optional. Image is compressed and embedded in your PDF report.</p>
+          </div>
           <Button type="submit" className="w-full gap-2"><Plus className="h-4 w-4" /> Add Expense</Button>
         </form>
 
