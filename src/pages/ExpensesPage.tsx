@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Wallet, Plus, Trash2, Download } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Wallet, Plus, Trash2, Download, Paperclip, X } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -12,6 +12,40 @@ import {
 import { useStore, store, fmtINR, type Expense } from "@/lib/store";
 
 const CATEGORIES: Expense["category"][] = ["Travel", "Food", "Lodging", "Fuel", "Other"];
+const MAX_BILL_BYTES = 4 * 1024 * 1024; // 4 MB raw upload cap
+
+function fileToCompressedDataUrl(file: File, maxDim = 1280, quality = 0.78): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Could not read image"));
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas unavailable"));
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageSize(dataUrl: string): Promise<{ w: number; h: number }> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.width, h: img.height });
+    img.onerror = () => resolve({ w: 600, h: 800 });
+    img.src = dataUrl;
+  });
+}
 
 export default function ExpensesPage() {
   const expenses = useStore(s => s.expenses);
