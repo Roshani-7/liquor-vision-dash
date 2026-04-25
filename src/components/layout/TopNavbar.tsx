@@ -2,6 +2,7 @@ import { Menu, Search, Moon, Sun, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 interface TopNavbarProps {
   onMenuClick: () => void;
@@ -27,6 +28,11 @@ export function TopNavbar({ onMenuClick }: TopNavbarProps) {
       <button onClick={onMenuClick} aria-label="Open menu" className="md:hidden text-muted-foreground hover:text-foreground transition-colors">
         <Menu className="h-5 w-5" />
       </button>
+
+      <div className="flex items-center gap-2 md:hidden">
+        <img src={logo} alt="Sales Intel" width={28} height={28} className="h-7 w-7 object-contain" />
+        <span className="text-sm font-semibold text-foreground">Sales Intel</span>
+      </div>
 
       <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

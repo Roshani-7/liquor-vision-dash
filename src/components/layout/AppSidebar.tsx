@@ -1,9 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Store, ShoppingCart, ClipboardList,
-  MapPin, Target, BarChart3, FileText, Bell, X, Wine, Wallet
+  MapPin, Target, BarChart3, FileText, Bell, X, Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -34,9 +35,13 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
       )}
     >
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-          <Wine className="h-5 w-5 text-sidebar-primary-foreground" />
-        </div>
+        <img
+          src={logo}
+          alt="Sales Intel logo"
+          width={36}
+          height={36}
+          className="h-9 w-9 rounded-lg object-contain"
+        />
         <div>
           <h1 className="text-sm font-semibold text-sidebar-accent-foreground">Sales Intel</h1>
           <p className="text-xs text-sidebar-muted">Area Manager</p>
