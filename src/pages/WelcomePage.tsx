@@ -97,7 +97,7 @@ export default function WelcomePage() {
           </p>
           <h1 className="mt-2 text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 md:text-7xl">
             <span className="bg-gradient-to-r from-sky-600 via-indigo-600 to-emerald-600 bg-clip-text text-transparent">
-              Santosh Galande
+              Sales Intelligence System
             </span>
           </h1>
 
