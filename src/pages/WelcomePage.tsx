@@ -69,8 +69,8 @@ export default function WelcomePage() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white shadow-md shadow-emerald-200">
-            S.G.
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-200">
+            <UserRound className="h-5 w-5" />
           </div>
           <button
             type="button"
