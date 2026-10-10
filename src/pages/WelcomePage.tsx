@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BarChart3, Wine, LayoutDashboard, Store, ShoppingCart, FileText, LogOut, TrendingUp, Target, Users, MapPin, Bell, Wallet, ClipboardList } from "lucide-react";
+import { ArrowRight, BarChart3, Wine, LayoutDashboard, Store, ShoppingCart, FileText, LogOut, TrendingUp, Target, Users, MapPin, Bell, Wallet, ClipboardList, UserRound } from "lucide-react";
 import { useStore, dashboardKPIs } from "@/lib/store";
 
 export default function WelcomePage() {
@@ -69,8 +69,8 @@ export default function WelcomePage() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white shadow-md shadow-emerald-200">
-            S.G.
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-200">
+            <UserRound className="h-5 w-5" />
           </div>
           <button
             type="button"
@@ -97,7 +97,7 @@ export default function WelcomePage() {
           </p>
           <h1 className="mt-2 text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 md:text-7xl">
             <span className="bg-gradient-to-r from-sky-600 via-indigo-600 to-emerald-600 bg-clip-text text-transparent">
-              Santosh Galande
+              Sales Intelligence System
             </span>
           </h1>
 
